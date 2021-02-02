@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/reprojection_error_test.dir/reprojection_error_test.cc.o  -o reprojection_error_test  ../lib/liblib.a /usr/local/lib/libceres.a -lpthread /usr/lib/x86_64-linux-gnu/libglog.so 

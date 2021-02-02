@@ -54,10 +54,7 @@ Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
 }
 
 int main(int argc, char **argv) {
-//    srand((unsigned int) time(0));
-//
-//    google::InitGoogleLogging(argv[0]);
-//
+
     // parameters
     Eigen::Vector3d gravity = Eigen::Vector3d(0, 0, -9.81007);
     Eigen::Vector3d a_N = Eigen::Vector3d(0, 0, 0);
@@ -70,8 +67,8 @@ int main(int argc, char **argv) {
     double sigma_a_c = 2.0e-3;
     double del_t = 0.01;
     double T = 0.0; // time
-    double r = 1.0; // circle radius x-y plane
-    double w = 1.01; // angular velocity
+    double r = 5.0; // circle radius x-y plane
+    double w = .576; // angular velocity
 
 
     // create containers
@@ -118,10 +115,10 @@ int main(int argc, char **argv) {
 
         omega_B(2) = w;
 
-//        Eigen::Vector3d gyr_noise = sigma_g_c/sqrt(del_t)*Eigen::Vector3d::Random();
-//        Eigen::Vector3d acc_noise = sigma_a_c/sqrt(del_t)*Eigen::Vector3d::Random();
-        Eigen::Vector3d gyr_noise = Eigen::Vector3d(0, 0, 0);
-        Eigen::Vector3d acc_noise = Eigen::Vector3d(0, 0, 0);
+        Eigen::Vector3d gyr_noise = sigma_g_c/sqrt(del_t)*Eigen::Vector3d::Random();
+        Eigen::Vector3d acc_noise = sigma_a_c/sqrt(del_t)*Eigen::Vector3d::Random();
+//        Eigen::Vector3d gyr_noise = Eigen::Vector3d(0, 0, 0);
+//        Eigen::Vector3d acc_noise = Eigen::Vector3d(0, 0, 0);
 
 
         new_imu_ptr->gyro_ = omega_B + gyr_noise;

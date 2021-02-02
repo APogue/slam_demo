@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/simulation.dir/simulation.cc.o  -o simulation  ../lib/liblib.a /usr/local/lib/libceres.a -lpthread /usr/lib/x86_64-linux-gnu/libglog.so 

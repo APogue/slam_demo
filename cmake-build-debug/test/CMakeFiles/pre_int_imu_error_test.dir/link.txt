@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/pre_int_imu_error_test.dir/pre_int_imu_error_test.cc.o  -o pre_int_imu_error_test  ../lib/liblib.a /usr/local/lib/libceres.a -lpthread /usr/lib/x86_64-linux-gnu/libglog.so 

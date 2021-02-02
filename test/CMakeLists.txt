@@ -25,7 +25,7 @@ target_link_libraries(reprojection_error_test
 add_executable(imu_error_test 
   imu_error_test.cc
   transformation.h
-)
+        )
 
 target_include_directories(imu_error_test
   PUBLIC ${CERES_INCLUDE_DIRS}     
@@ -58,3 +58,20 @@ target_link_libraries(pre_int_imu_error_test
   PUBLIC ${EIGEN3_LIBS}
   PUBLIC lib
 )
+
+add_executable(simulation
+        simulation.cc
+        transformation.h
+        )
+
+target_include_directories(simulation
+        PUBLIC ${CERES_INCLUDE_DIRS}
+        PUBLIC ${EIGEN3_INCLUDE_DIR}
+        PUBLIC lib
+        )
+
+target_link_libraries(simulation
+        PUBLIC ceres
+        PUBLIC ${EIGEN3_LIBS}
+        PUBLIC lib
+        )
