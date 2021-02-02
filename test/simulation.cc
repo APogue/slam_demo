@@ -67,9 +67,10 @@ int main(int argc, char **argv) {
     double sigma_a_c = 2.0e-3;
     double del_t = 0.01;
     double T = 0.0; // time
-    double r = 5.0; // circle radius x-y plane
-    double w = .576; // angular velocity
-
+    double r = 10.0; // circle radius x-y plane
+    double w = .76; // angular velocity
+    double r_z = (1.0/20)*r;
+    double w_z = (1.0/5)*w;
 
     // create containers
     std::vector<State*> state_vec;
@@ -84,11 +85,11 @@ int main(int argc, char **argv) {
         new_state_ptr->t_ = T;
         new_state_ptr->p_(0) = r*cos(w*T);
         new_state_ptr->p_(1) = r*sin(w*T);
-        new_state_ptr->p_(2) = (1.0/3)*r*sin((1.0/3)*w*T);
+        new_state_ptr->p_(2) = r_z*sin(w_z*T);
 
         new_state_ptr->v_(0) = -r*w*sin(w*T);
         new_state_ptr->v_(1) = r*w*cos(w*T);
-        new_state_ptr->v_(2) = pow((1.0/3),2)*w*r*cos((1.0/3)*(w*T));
+        new_state_ptr->v_(2) = r_z*w_z*cos(w_z*T);
 
 
         Tr << cos(w*T),-sin(w*T), 0,
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
 
         a_N(0) = -r*(w*w)*cos(w*T);
         a_N(1) = -r*(w*w)*sin(w*T);
-        a_N(2) = -pow((1.0/3),3)*(w*w)*r*sin((1.0/3)*(w*T));
+        a_N(2) = -r_z*(w_z*w_z)*sin(w_z*T);
 
         omega_B(2) = w;
 
