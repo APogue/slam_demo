@@ -143,17 +143,17 @@ lib/fast:
 .PHONY : lib/fast
 
 #=============================================================================
-# Target rules for targets named simulation
+# Target rules for targets named reprojection_error_test
 
 # Build rule for target.
-simulation: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 simulation
-.PHONY : simulation
+reprojection_error_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 reprojection_error_test
+.PHONY : reprojection_error_test
 
 # fast build rule for target.
-simulation/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/build
-.PHONY : simulation/fast
+reprojection_error_test/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/reprojection_error_test.dir/build.make test/CMakeFiles/reprojection_error_test.dir/build
+.PHONY : reprojection_error_test/fast
 
 #=============================================================================
 # Target rules for targets named pre_int_imu_error_test
@@ -169,19 +169,6 @@ pre_int_imu_error_test/fast:
 .PHONY : pre_int_imu_error_test/fast
 
 #=============================================================================
-# Target rules for targets named reprojection_error_test
-
-# Build rule for target.
-reprojection_error_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 reprojection_error_test
-.PHONY : reprojection_error_test
-
-# fast build rule for target.
-reprojection_error_test/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/reprojection_error_test.dir/build.make test/CMakeFiles/reprojection_error_test.dir/build
-.PHONY : reprojection_error_test/fast
-
-#=============================================================================
 # Target rules for targets named imu_error_test
 
 # Build rule for target.
@@ -193,6 +180,32 @@ imu_error_test: cmake_check_build_system
 imu_error_test/fast:
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/imu_error_test.dir/build.make test/CMakeFiles/imu_error_test.dir/build
 .PHONY : imu_error_test/fast
+
+#=============================================================================
+# Target rules for targets named simulation_v2
+
+# Build rule for target.
+simulation_v2: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 simulation_v2
+.PHONY : simulation_v2
+
+# fast build rule for target.
+simulation_v2/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/build
+.PHONY : simulation_v2/fast
+
+#=============================================================================
+# Target rules for targets named simulation
+
+# Build rule for target.
+simulation: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 simulation
+.PHONY : simulation
+
+# fast build rule for target.
+simulation/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/build
+.PHONY : simulation/fast
 
 # Help Target
 help:
@@ -207,6 +220,7 @@ help:
 	@echo "... pre_int_imu_error_test"
 	@echo "... reprojection_error_test"
 	@echo "... simulation"
+	@echo "... simulation_v2"
 .PHONY : help
 
 

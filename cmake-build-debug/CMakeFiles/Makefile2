@@ -112,6 +112,7 @@ lib/clean: lib/CMakeFiles/lib.dir/clean
 # Directory level rules for directory test
 
 # Recursive "all" directory target.
+test/all: test/CMakeFiles/simulation_v2.dir/all
 test/all: test/CMakeFiles/reprojection_error_test.dir/all
 test/all: test/CMakeFiles/imu_error_test.dir/all
 test/all: test/CMakeFiles/simulation.dir/all
@@ -125,6 +126,7 @@ test/preinstall:
 .PHONY : test/preinstall
 
 # Recursive "clean" directory target.
+test/clean: test/CMakeFiles/simulation_v2.dir/clean
 test/clean: test/CMakeFiles/reprojection_error_test.dir/clean
 test/clean: test/CMakeFiles/imu_error_test.dir/clean
 test/clean: test/CMakeFiles/simulation.dir/clean
@@ -158,6 +160,33 @@ lib: lib/CMakeFiles/lib.dir/rule
 lib/CMakeFiles/lib.dir/clean:
 	$(MAKE) $(MAKESILENT) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/clean
 .PHONY : lib/CMakeFiles/lib.dir/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/simulation_v2.dir
+
+# All Build rule for target.
+test/CMakeFiles/simulation_v2.dir/all: lib/CMakeFiles/lib.dir/all
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/depend
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles --progress-num=10,11 "Built target simulation_v2"
+.PHONY : test/CMakeFiles/simulation_v2.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/simulation_v2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/simulation_v2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles 0
+.PHONY : test/CMakeFiles/simulation_v2.dir/rule
+
+# Convenience name for target.
+simulation_v2: test/CMakeFiles/simulation_v2.dir/rule
+
+.PHONY : simulation_v2
+
+# clean rule for target.
+test/CMakeFiles/simulation_v2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/clean
+.PHONY : test/CMakeFiles/simulation_v2.dir/clean
 
 #=============================================================================
 # Target rules for target test/CMakeFiles/reprojection_error_test.dir

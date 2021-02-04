@@ -508,7 +508,7 @@ class ExpLandmarkOptSLAM {
     }
 
     for (size_t i=0; i<state_vec_.size(); ++i) {
-      optimization_problem_.AddParameterBlock(state_vec_.at(i)->GetRotationBlock()->parameters(), 4, quat_parameterization_ptr_);
+      optimization_problem_.AddParameterBlock(state_vec_.at(i)->GetRotationBlock()->parameters(), 4);
       optimization_problem_.AddParameterBlock(state_vec_.at(i)->GetVelocityBlock()->parameters(), 3);
       optimization_problem_.AddParameterBlock(state_vec_.at(i)->GetPositionBlock()->parameters(), 3);
     }

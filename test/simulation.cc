@@ -56,13 +56,7 @@ Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
 int main(int argc, char **argv) {
 
     // parameters
-    Eigen::Vector3d gravity = Eigen::Vector3d(0, 0, -9.81007);
-    Eigen::Vector3d a_N = Eigen::Vector3d(0, 0, 0);
-    Eigen::Vector3d omega_B = Eigen::Vector3d(0, 0, 0);
-    Eigen::Matrix<double,3,3> Tr;
-    Eigen::Vector3d p_obs = Eigen::Vector3d(0, 0, 0);
-    Eigen::Vector3d v_obs = Eigen::Vector3d(0, 0, 0);
-    Eigen::Quaterniond q_obs = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
+
     double sigma_g_c = 6.0e-4;
     double sigma_a_c = 2.0e-3;
     double del_t = 0.01;
@@ -70,18 +64,16 @@ int main(int argc, char **argv) {
     double r = 10.0; // circle radius x-y plane
     double w = .76; // angular velocity
     double r_z = (1.0/20)*r;
-    double w_z = (1.0/5)*w;
-
+    double w_z = (2.3)*w;
+    Eigen::Vector3d gravity = Eigen::Vector3d(0, 0, -9.81007);
     // create containers
     std::vector<State*> state_vec;
     std::vector<IMU*> imu_vec;
     std::vector<Observation*> obs_vec;
 
     for (unsigned i=0; i<1000; i++) {
-        T = T + del_t;
-
+        Eigen::Matrix<double,3,3> Tr;
         State* new_state_ptr = new State;
-
         new_state_ptr->t_ = T;
         new_state_ptr->p_(0) = r*cos(w*T);
         new_state_ptr->p_(1) = r*sin(w*T);
@@ -90,7 +82,6 @@ int main(int argc, char **argv) {
         new_state_ptr->v_(0) = -r*w*sin(w*T);
         new_state_ptr->v_(1) = r*w*cos(w*T);
         new_state_ptr->v_(2) = r_z*w_z*cos(w_z*T);
-
 
         Tr << cos(w*T),-sin(w*T), 0,
              sin(w*T), cos(w*T), 0,
@@ -101,14 +92,15 @@ int main(int argc, char **argv) {
         state_vec.push_back(new_state_ptr);
 
         state_vec.at(i)->q_= quat_pos(state_vec.at(i)->q_);
+        T = T + del_t;
     };
 
     // IMU -> est. trajectory
     T = 0.0;
-    for (unsigned i=0; i<1000; i++) {
-        T = T + del_t;
-
+    for (unsigned i=0; i<999; i++) {
         IMU* new_imu_ptr = new IMU;
+        Eigen::Vector3d a_N;
+        Eigen::Vector3d omega_B = Eigen::Vector3d(0, 0, 0);
 
         a_N(0) = -r*(w*w)*cos(w*T);
         a_N(1) = -r*(w*w)*sin(w*T);
@@ -126,6 +118,7 @@ int main(int argc, char **argv) {
         new_imu_ptr->accel_= state_vec.at(i)->q_.toRotationMatrix().transpose() * (a_N - gravity) + acc_noise; // expressed in the body frame
 
         imu_vec.push_back(new_imu_ptr);
+        T = T + del_t;
     };
 
     // Dead reckoning -> est. trajectory
@@ -134,24 +127,21 @@ int main(int argc, char **argv) {
     new_obs_ptr->v_obs_= state_vec.at(0)->v_;
     new_obs_ptr->q_obs_= state_vec.at(0)->q_;
     obs_vec.push_back(new_obs_ptr);
+    T = 0;
     for (unsigned i=1; i<1000; i++) {
-
         Observation* new_obs_ptr = new Observation;
 
-        p_obs = obs_vec.at(i-1)->p_obs_ + del_t * obs_vec.at(i-1)->v_obs_ + 0.5 * (del_t * del_t)*
+        new_obs_ptr->p_obs_ = obs_vec.at(i-1)->p_obs_ + del_t * obs_vec.at(i-1)->v_obs_ + 0.5 * (del_t * del_t)*
                 (obs_vec.at(i-1)->q_obs_.toRotationMatrix()*imu_vec.at(i-1)->accel_ + gravity);
 
-        v_obs = obs_vec.at(i-1)->v_obs_ + del_t *
+        new_obs_ptr->v_obs_ = obs_vec.at(i-1)->v_obs_ + del_t *
                 (obs_vec.at(i-1)->q_obs_.toRotationMatrix()*imu_vec.at(i-1)->accel_ + gravity);
 
-        q_obs = obs_vec.at(i-1)->q_obs_.normalized()*Exp(del_t * imu_vec.at(i-1)->gyro_);
-
-        new_obs_ptr->p_obs_ = p_obs;
-        new_obs_ptr->v_obs_ = v_obs;
-        new_obs_ptr->q_obs_ = q_obs; //normalize this somewhere?
+        new_obs_ptr->q_obs_ = obs_vec.at(i-1)->q_obs_.normalized()*Exp(del_t * imu_vec.at(i-1)->gyro_);
 
         obs_vec.push_back(new_obs_ptr);
         obs_vec.at(i)->q_obs_= quat_pos(obs_vec.at(i)->q_obs_);
+        T = T + del_t;
     };
 
 

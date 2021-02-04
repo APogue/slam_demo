@@ -131,6 +131,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+test/CMakeFiles/simulation_v2.dir/rule:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/simulation_v2.dir/rule
+.PHONY : test/CMakeFiles/simulation_v2.dir/rule
+
+# Convenience name for target.
+simulation_v2: test/CMakeFiles/simulation_v2.dir/rule
+
+.PHONY : simulation_v2
+
+# fast build rule for target.
+simulation_v2/fast:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/build
+.PHONY : simulation_v2/fast
+
+# Convenience name for target.
 test/CMakeFiles/reprojection_error_test.dir/rule:
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/reprojection_error_test.dir/rule
 .PHONY : test/CMakeFiles/reprojection_error_test.dir/rule
@@ -277,6 +292,7 @@ simulation.o: simulation.cc.o
 
 # target to build an object file
 simulation.cc.o:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.o
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.o
 .PHONY : simulation.cc.o
 
@@ -286,6 +302,7 @@ simulation.i: simulation.cc.i
 
 # target to preprocess a source file
 simulation.cc.i:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.i
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.i
 .PHONY : simulation.cc.i
 
@@ -295,6 +312,7 @@ simulation.s: simulation.cc.s
 
 # target to generate assembly for a file
 simulation.cc.s:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.s
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.s
 .PHONY : simulation.cc.s
 
@@ -310,6 +328,7 @@ help:
 	@echo "... pre_int_imu_error_test"
 	@echo "... reprojection_error_test"
 	@echo "... simulation"
+	@echo "... simulation_v2"
 	@echo "... imu_error_test.o"
 	@echo "... imu_error_test.i"
 	@echo "... imu_error_test.s"

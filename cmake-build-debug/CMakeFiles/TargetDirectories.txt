@@ -4,6 +4,7 @@
 /home/alexie/Documents/slam_demo/cmake-build-debug/lib/CMakeFiles/rebuild_cache.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/lib/CMakeFiles/lib.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/rebuild_cache.dir
+/home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/simulation_v2.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/edit_cache.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/reprojection_error_test.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/imu_error_test.dir

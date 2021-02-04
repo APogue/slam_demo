@@ -130,19 +130,19 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-test/CMakeFiles/simulation.dir/rule:
-	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/simulation.dir/rule
-.PHONY : test/CMakeFiles/simulation.dir/rule
+test/CMakeFiles/reprojection_error_test.dir/rule:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/reprojection_error_test.dir/rule
+.PHONY : test/CMakeFiles/reprojection_error_test.dir/rule
 
 # Convenience name for target.
-simulation: test/CMakeFiles/simulation.dir/rule
+reprojection_error_test: test/CMakeFiles/reprojection_error_test.dir/rule
 
-.PHONY : simulation
+.PHONY : reprojection_error_test
 
 # fast build rule for target.
-simulation/fast:
-	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/build
-.PHONY : simulation/fast
+reprojection_error_test/fast:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/reprojection_error_test.dir/build.make test/CMakeFiles/reprojection_error_test.dir/build
+.PHONY : reprojection_error_test/fast
 
 # Convenience name for target.
 test/CMakeFiles/pre_int_imu_error_test.dir/rule:
@@ -160,21 +160,6 @@ pre_int_imu_error_test/fast:
 .PHONY : pre_int_imu_error_test/fast
 
 # Convenience name for target.
-test/CMakeFiles/reprojection_error_test.dir/rule:
-	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/reprojection_error_test.dir/rule
-.PHONY : test/CMakeFiles/reprojection_error_test.dir/rule
-
-# Convenience name for target.
-reprojection_error_test: test/CMakeFiles/reprojection_error_test.dir/rule
-
-.PHONY : reprojection_error_test
-
-# fast build rule for target.
-reprojection_error_test/fast:
-	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/reprojection_error_test.dir/build.make test/CMakeFiles/reprojection_error_test.dir/build
-.PHONY : reprojection_error_test/fast
-
-# Convenience name for target.
 test/CMakeFiles/imu_error_test.dir/rule:
 	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/imu_error_test.dir/rule
 .PHONY : test/CMakeFiles/imu_error_test.dir/rule
@@ -188,6 +173,36 @@ imu_error_test: test/CMakeFiles/imu_error_test.dir/rule
 imu_error_test/fast:
 	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/imu_error_test.dir/build.make test/CMakeFiles/imu_error_test.dir/build
 .PHONY : imu_error_test/fast
+
+# Convenience name for target.
+test/CMakeFiles/simulation_v2.dir/rule:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/simulation_v2.dir/rule
+.PHONY : test/CMakeFiles/simulation_v2.dir/rule
+
+# Convenience name for target.
+simulation_v2: test/CMakeFiles/simulation_v2.dir/rule
+
+.PHONY : simulation_v2
+
+# fast build rule for target.
+simulation_v2/fast:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/build
+.PHONY : simulation_v2/fast
+
+# Convenience name for target.
+test/CMakeFiles/simulation.dir/rule:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/simulation.dir/rule
+.PHONY : test/CMakeFiles/simulation.dir/rule
+
+# Convenience name for target.
+simulation: test/CMakeFiles/simulation.dir/rule
+
+.PHONY : simulation
+
+# fast build rule for target.
+simulation/fast:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/build
+.PHONY : simulation/fast
 
 imu_error_test.o: imu_error_test.cc.o
 
@@ -297,6 +312,33 @@ simulation.cc.s:
 	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.s
 .PHONY : simulation.cc.s
 
+simulation_v2.o: simulation_v2.cc.o
+
+.PHONY : simulation_v2.o
+
+# target to build an object file
+simulation_v2.cc.o:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o
+.PHONY : simulation_v2.cc.o
+
+simulation_v2.i: simulation_v2.cc.i
+
+.PHONY : simulation_v2.i
+
+# target to preprocess a source file
+simulation_v2.cc.i:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.i
+.PHONY : simulation_v2.cc.i
+
+simulation_v2.s: simulation_v2.cc.s
+
+.PHONY : simulation_v2.s
+
+# target to generate assembly for a file
+simulation_v2.cc.s:
+	cd /home/alexie/Documents/slam_demo/build && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.s
+.PHONY : simulation_v2.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -309,6 +351,7 @@ help:
 	@echo "... pre_int_imu_error_test"
 	@echo "... reprojection_error_test"
 	@echo "... simulation"
+	@echo "... simulation_v2"
 	@echo "... imu_error_test.o"
 	@echo "... imu_error_test.i"
 	@echo "... imu_error_test.s"
@@ -321,6 +364,9 @@ help:
 	@echo "... simulation.o"
 	@echo "... simulation.i"
 	@echo "... simulation.s"
+	@echo "... simulation_v2.o"
+	@echo "... simulation_v2.i"
+	@echo "... simulation_v2.s"
 .PHONY : help
 
 
