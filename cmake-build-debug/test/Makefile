@@ -292,7 +292,6 @@ simulation.o: simulation.cc.o
 
 # target to build an object file
 simulation.cc.o:
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.o
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.o
 .PHONY : simulation.cc.o
 
@@ -302,7 +301,6 @@ simulation.i: simulation.cc.i
 
 # target to preprocess a source file
 simulation.cc.i:
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.i
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.i
 .PHONY : simulation.cc.i
 
@@ -312,9 +310,35 @@ simulation.s: simulation.cc.s
 
 # target to generate assembly for a file
 simulation.cc.s:
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation.cc.s
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/simulation.cc.s
 .PHONY : simulation.cc.s
+
+simulation_v2.o: simulation_v2.cc.o
+
+.PHONY : simulation_v2.o
+
+# target to build an object file
+simulation_v2.cc.o:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o
+.PHONY : simulation_v2.cc.o
+
+simulation_v2.i: simulation_v2.cc.i
+
+.PHONY : simulation_v2.i
+
+# target to preprocess a source file
+simulation_v2.cc.i:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.i
+.PHONY : simulation_v2.cc.i
+
+simulation_v2.s: simulation_v2.cc.s
+
+.PHONY : simulation_v2.s
+
+# target to generate assembly for a file
+simulation_v2.cc.s:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.s
+.PHONY : simulation_v2.cc.s
 
 # Help Target
 help:
@@ -341,6 +365,9 @@ help:
 	@echo "... simulation.o"
 	@echo "... simulation.i"
 	@echo "... simulation.s"
+	@echo "... simulation_v2.o"
+	@echo "... simulation_v2.i"
+	@echo "... simulation_v2.s"
 .PHONY : help
 
 

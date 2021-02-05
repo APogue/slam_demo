@@ -92,3 +92,20 @@ target_link_libraries(simulation_v2
         PUBLIC ${EIGEN3_LIBS}
         PUBLIC lib
         )
+
+add_executable(v3_simulation
+        v3_simulation.cc
+        transformation.h
+        )
+
+target_include_directories(v3_simulation
+        PUBLIC ${CERES_INCLUDE_DIRS}
+        PUBLIC ${EIGEN3_INCLUDE_DIR}
+        PUBLIC lib
+        )
+
+target_link_libraries(v3_simulation
+        PUBLIC ceres
+        PUBLIC ${EIGEN3_LIBS}
+        PUBLIC lib
+        )

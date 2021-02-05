@@ -403,8 +403,10 @@
 			<Option target="reprojection_error_test"/>
 		</Unit>
 		<Unit filename="/home/alexie/Documents/slam_demo/test/simulation.cc">
-			<Option target="simulation_v2"/>
 			<Option target="simulation"/>
+		</Unit>
+		<Unit filename="/home/alexie/Documents/slam_demo/test/simulation_v2.cc">
+			<Option target="simulation_v2"/>
 		</Unit>
 		<Unit filename="/home/alexie/Documents/slam_demo/test/transformation.h">
 			<Option target="simulation_v2"/>

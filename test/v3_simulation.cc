@@ -77,7 +77,7 @@ Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
     return q;
 };
 
-void create_csv(std::vector<State*> state_vec, std::string file_path){
+void create_csv(std::vector<State*> state_vec, const std::string& file_path){
   std::ofstream output_file(file_path);
   output_file << "timestamp,p_x,p_y,p_z,v_x,v_y,v_z,q_w,q_x,q_y,q_z\n";
 
@@ -181,20 +181,20 @@ public:
     }
     return true;
   }
-
+  void set_init_traj(std::vector<State*> state_vec_, const Eigen::Vector3d& p0,
+                     const Eigen::Vector3d& v0, const Eigen::Quaterniond& q0){
+    state_vec_.at(0)->GetPositionBlock()->setEstimate(p0);
+    state_vec_.at(0)->GetVelocityBlock()->setEstimate(v0);
+    state_vec_.at(0)->GetRotationBlock()->setEstimate(q0);
+  }
   bool SetDeadReckoning(){
-  // Dead reckoning -> est. trajectory
-    Eigen::Vector3d p_dr;
-    Eigen::Vector3d v_dr;
-    Eigen::Quaterniond q_dr;
+    // Dead reckoning -> est. trajectory
     T = 0;
-    p_dr= gt_vec_.at(0)->GetPositionBlock()->estimate();
-    v_dr= gt_vec_.at(0)->GetVelocityBlock()->estimate();
-    q_dr= gt_vec_.at(0)->GetRotationBlock()->estimate();
     dr_vec_.push_back(new State(T));
-    dr_vec_.at(0)->GetPositionBlock()->setEstimate(p_dr);
-    dr_vec_.at(0)->GetVelocityBlock()->setEstimate(v_dr);
-    dr_vec_.at(0)->GetRotationBlock()->setEstimate(q_dr);
+    Eigen::Vector3d p_dr = gt_vec_.at(0)->GetPositionBlock()->estimate();
+    Eigen::Vector3d v_dr = gt_vec_.at(0)->GetVelocityBlock()->estimate();
+    Eigen::Quaterniond q_dr = gt_vec_.at(0)->GetRotationBlock()->estimate();
+    set_init_traj( dr_vec_, p_dr, v_dr, q_dr);  //set the initial point
     for (unsigned i=1; i<state_length; i++) {
       T = T + del_t;
       p_dr = dr_vec_.at(i-1)->GetPositionBlock()->estimate() +

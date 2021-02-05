@@ -77,27 +77,27 @@ include test/CMakeFiles/simulation_v2.dir/progress.make
 # Include the compile flags for this target's objects.
 include test/CMakeFiles/simulation_v2.dir/flags.make
 
-test/CMakeFiles/simulation_v2.dir/simulation.cc.o: test/CMakeFiles/simulation_v2.dir/flags.make
-test/CMakeFiles/simulation_v2.dir/simulation.cc.o: ../test/simulation.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/simulation_v2.dir/simulation.cc.o"
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/simulation_v2.dir/simulation.cc.o -c /home/alexie/Documents/slam_demo/test/simulation.cc
+test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o: test/CMakeFiles/simulation_v2.dir/flags.make
+test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o: ../test/simulation_v2.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o"
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/simulation_v2.dir/simulation_v2.cc.o -c /home/alexie/Documents/slam_demo/test/simulation_v2.cc
 
-test/CMakeFiles/simulation_v2.dir/simulation.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/simulation_v2.dir/simulation.cc.i"
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/alexie/Documents/slam_demo/test/simulation.cc > CMakeFiles/simulation_v2.dir/simulation.cc.i
+test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/simulation_v2.dir/simulation_v2.cc.i"
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/alexie/Documents/slam_demo/test/simulation_v2.cc > CMakeFiles/simulation_v2.dir/simulation_v2.cc.i
 
-test/CMakeFiles/simulation_v2.dir/simulation.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/simulation_v2.dir/simulation.cc.s"
-	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alexie/Documents/slam_demo/test/simulation.cc -o CMakeFiles/simulation_v2.dir/simulation.cc.s
+test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/simulation_v2.dir/simulation_v2.cc.s"
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug/test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alexie/Documents/slam_demo/test/simulation_v2.cc -o CMakeFiles/simulation_v2.dir/simulation_v2.cc.s
 
 # Object files for target simulation_v2
 simulation_v2_OBJECTS = \
-"CMakeFiles/simulation_v2.dir/simulation.cc.o"
+"CMakeFiles/simulation_v2.dir/simulation_v2.cc.o"
 
 # External object files for target simulation_v2
 simulation_v2_EXTERNAL_OBJECTS =
 
-test/simulation_v2: test/CMakeFiles/simulation_v2.dir/simulation.cc.o
+test/simulation_v2: test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.o
 test/simulation_v2: test/CMakeFiles/simulation_v2.dir/build.make
 test/simulation_v2: lib/liblib.a
 test/simulation_v2: /usr/local/lib/libceres.a
