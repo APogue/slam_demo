@@ -116,6 +116,7 @@ test/all: test/CMakeFiles/simulation_v2.dir/all
 test/all: test/CMakeFiles/reprojection_error_test.dir/all
 test/all: test/CMakeFiles/imu_error_test.dir/all
 test/all: test/CMakeFiles/simulation.dir/all
+test/all: test/CMakeFiles/v3_simulation.dir/all
 test/all: test/CMakeFiles/pre_int_imu_error_test.dir/all
 
 .PHONY : test/all
@@ -130,6 +131,7 @@ test/clean: test/CMakeFiles/simulation_v2.dir/clean
 test/clean: test/CMakeFiles/reprojection_error_test.dir/clean
 test/clean: test/CMakeFiles/imu_error_test.dir/clean
 test/clean: test/CMakeFiles/simulation.dir/clean
+test/clean: test/CMakeFiles/v3_simulation.dir/clean
 test/clean: test/CMakeFiles/pre_int_imu_error_test.dir/clean
 
 .PHONY : test/clean
@@ -268,6 +270,33 @@ simulation: test/CMakeFiles/simulation.dir/rule
 test/CMakeFiles/simulation.dir/clean:
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/clean
 .PHONY : test/CMakeFiles/simulation.dir/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/v3_simulation.dir
+
+# All Build rule for target.
+test/CMakeFiles/v3_simulation.dir/all: lib/CMakeFiles/lib.dir/all
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/depend
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles --progress-num=12,13 "Built target v3_simulation"
+.PHONY : test/CMakeFiles/v3_simulation.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/v3_simulation.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/v3_simulation.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/cmake-build-debug/CMakeFiles 0
+.PHONY : test/CMakeFiles/v3_simulation.dir/rule
+
+# Convenience name for target.
+v3_simulation: test/CMakeFiles/v3_simulation.dir/rule
+
+.PHONY : v3_simulation
+
+# clean rule for target.
+test/CMakeFiles/v3_simulation.dir/clean:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/clean
+.PHONY : test/CMakeFiles/v3_simulation.dir/clean
 
 #=============================================================================
 # Target rules for target test/CMakeFiles/pre_int_imu_error_test.dir

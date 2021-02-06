@@ -191,6 +191,21 @@ simulation/fast:
 .PHONY : simulation/fast
 
 # Convenience name for target.
+test/CMakeFiles/v3_simulation.dir/rule:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/v3_simulation.dir/rule
+.PHONY : test/CMakeFiles/v3_simulation.dir/rule
+
+# Convenience name for target.
+v3_simulation: test/CMakeFiles/v3_simulation.dir/rule
+
+.PHONY : v3_simulation
+
+# fast build rule for target.
+v3_simulation/fast:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/build
+.PHONY : v3_simulation/fast
+
+# Convenience name for target.
 test/CMakeFiles/pre_int_imu_error_test.dir/rule:
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/pre_int_imu_error_test.dir/rule
 .PHONY : test/CMakeFiles/pre_int_imu_error_test.dir/rule
@@ -340,6 +355,33 @@ simulation_v2.cc.s:
 	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/simulation_v2.cc.s
 .PHONY : simulation_v2.cc.s
 
+v3_simulation.o: v3_simulation.cc.o
+
+.PHONY : v3_simulation.o
+
+# target to build an object file
+v3_simulation.cc.o:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o
+.PHONY : v3_simulation.cc.o
+
+v3_simulation.i: v3_simulation.cc.i
+
+.PHONY : v3_simulation.i
+
+# target to preprocess a source file
+v3_simulation.cc.i:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.i
+.PHONY : v3_simulation.cc.i
+
+v3_simulation.s: v3_simulation.cc.s
+
+.PHONY : v3_simulation.s
+
+# target to generate assembly for a file
+v3_simulation.cc.s:
+	cd /home/alexie/Documents/slam_demo/cmake-build-debug && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.s
+.PHONY : v3_simulation.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -353,6 +395,7 @@ help:
 	@echo "... reprojection_error_test"
 	@echo "... simulation"
 	@echo "... simulation_v2"
+	@echo "... v3_simulation"
 	@echo "... imu_error_test.o"
 	@echo "... imu_error_test.i"
 	@echo "... imu_error_test.s"
@@ -368,6 +411,9 @@ help:
 	@echo "... simulation_v2.o"
 	@echo "... simulation_v2.i"
 	@echo "... simulation_v2.s"
+	@echo "... v3_simulation.o"
+	@echo "... v3_simulation.i"
+	@echo "... v3_simulation.s"
 .PHONY : help
 
 

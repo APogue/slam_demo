@@ -196,6 +196,19 @@ simulation/fast:
 .PHONY : simulation/fast
 
 #=============================================================================
+# Target rules for targets named v3_simulation
+
+# Build rule for target.
+v3_simulation: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 v3_simulation
+.PHONY : v3_simulation
+
+# fast build rule for target.
+v3_simulation/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/build
+.PHONY : v3_simulation/fast
+
+#=============================================================================
 # Target rules for targets named pre_int_imu_error_test
 
 # Build rule for target.
@@ -222,6 +235,7 @@ help:
 	@echo "... reprojection_error_test"
 	@echo "... simulation"
 	@echo "... simulation_v2"
+	@echo "... v3_simulation"
 .PHONY : help
 
 

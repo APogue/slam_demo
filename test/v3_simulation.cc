@@ -116,7 +116,9 @@ class SimSLAM {
   std::vector<State*> gt_vec_;
   std::vector<IMU*> imu_vec_;
   std::vector<State*> dr_vec_;
-
+  ceres::Problem optimization_problem_;
+  ceres::Solver::Options optimization_options_;
+  ceres::Solver::Summary optimization_summary_;
 public:
   bool SetGroundTruth() {
     for (unsigned i = 0; i < state_length; i++) {
@@ -181,20 +183,28 @@ public:
     }
     return true;
   }
-  void set_init_traj(std::vector<State*> state_vec_, const Eigen::Vector3d& p0,
+  void set_init_traj(const Eigen::Vector3d& p0,
                      const Eigen::Vector3d& v0, const Eigen::Quaterniond& q0){
-    state_vec_.at(0)->GetPositionBlock()->setEstimate(p0);
-    state_vec_.at(0)->GetVelocityBlock()->setEstimate(v0);
-    state_vec_.at(0)->GetRotationBlock()->setEstimate(q0);
+    T = 0;
+    dr_vec_.push_back(new State(T)); //how can this be pushed back inside the function?
+    dr_vec_.at(0)->GetPositionBlock()->setEstimate(p0);
+    dr_vec_.at(0)->GetVelocityBlock()->setEstimate(v0);
+    dr_vec_.at(0)->GetRotationBlock()->setEstimate(q0);
+  }
+  void add_noise_traj() {
+    for (unsigned i = 1; i < state_length; i++) {
+      Eigen::Vector3d p_noise_ = dr_vec_.at(i)->GetPositionBlock()->estimate() + .5*Eigen::Vector3d::Random();
+      Eigen::Vector3d v_noise_ = dr_vec_.at(i)->GetVelocityBlock()->estimate() + .5*Eigen::Vector3d::Random();
+      dr_vec_.at(i)->GetPositionBlock()->setEstimate(p_noise_);
+      dr_vec_.at(i)->GetVelocityBlock()->setEstimate(v_noise_);
+    }
   }
   bool SetDeadReckoning(){
     // Dead reckoning -> est. trajectory
-    T = 0;
-    dr_vec_.push_back(new State(T));
     Eigen::Vector3d p_dr = gt_vec_.at(0)->GetPositionBlock()->estimate();
     Eigen::Vector3d v_dr = gt_vec_.at(0)->GetVelocityBlock()->estimate();
     Eigen::Quaterniond q_dr = gt_vec_.at(0)->GetRotationBlock()->estimate();
-    set_init_traj( dr_vec_, p_dr, v_dr, q_dr);  //set the initial point
+    set_init_traj(p_dr, v_dr, q_dr);  //set the initial point
     for (unsigned i=1; i<state_length; i++) {
       T = T + del_t;
       p_dr = dr_vec_.at(i-1)->GetPositionBlock()->estimate() +
@@ -215,17 +225,72 @@ public:
       dr_vec_.at(i)->GetVelocityBlock()->setEstimate(v_dr);
       dr_vec_.at(i)->GetRotationBlock()->setEstimate(q_dr);
     }
+    add_noise_traj();
+//    dr_vec_.at(state_length-1)->GetPositionBlock()->setEstimate(Eigen::Vector3d(10,10,10));
     return true;
   }
   bool OutputTrajectoryResult(){
-
     create_csv(gt_vec_, "trajectory.csv");
-    create_csv(dr_vec_, "trajectory_obs.csv");
-
+    create_csv(dr_vec_, "trajectory_dr.csv");
     return true;
   }
-};
+  bool SetupOptProblem() {
+    for (size_t i=0; i<dr_vec_.size(); ++i) {
+      optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetRotationBlock()->parameters(), 4);
+      optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetVelocityBlock()->parameters(), 3);
+      optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetPositionBlock()->parameters(), 3);
+    }
 
+
+    // imu constraints
+    for (size_t i=0; i<imu_vec_.size(); ++i) {
+      ceres::CostFunction* cost_function = new ImuError(imu_vec_.at(i)->gyro_,
+                                                        imu_vec_.at(i)->accel_,
+                                                        del_t,
+                                                        Eigen::Vector3d(0,0,0),
+                                                        Eigen::Vector3d(0,0,0),
+                                                        sigma_g_c,
+                                                        sigma_a_c);
+
+      optimization_problem_.AddResidualBlock(cost_function,
+                                             NULL,
+                                             dr_vec_.at(i+1)->GetRotationBlock()->parameters(),
+                                             dr_vec_.at(i+1)->GetVelocityBlock()->parameters(),
+                                             dr_vec_.at(i+1)->GetPositionBlock()->parameters(),
+                                             dr_vec_.at(i)->GetRotationBlock()->parameters(),
+                                             dr_vec_.at(i)->GetVelocityBlock()->parameters(),
+                                             dr_vec_.at(i)->GetPositionBlock()->parameters());
+    }
+      optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetRotationBlock()->parameters());
+      optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetVelocityBlock()->parameters());
+      optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetPositionBlock()->parameters());
+
+      return true;
+      }
+
+    bool SolveOptimizationProblem() {
+
+      std::cout << "Begin solving the optimization problem." << std::endl;
+
+      optimization_options_.linear_solver_type = ceres::SPARSE_SCHUR;
+      optimization_options_.minimizer_progress_to_stdout = true;
+      optimization_options_.num_threads = 6;
+      optimization_options_.function_tolerance = 1e-10;
+      optimization_options_.parameter_tolerance = 1e-15;
+      optimization_options_.max_num_iterations = 500;
+
+
+      ceres::Solve(optimization_options_, &optimization_problem_, &optimization_summary_);
+      std::cout << optimization_summary_.FullReport() << "\n";
+
+      return true;
+    }
+
+    bool OutputOptResult(){
+      create_csv(dr_vec_, "trajectory_opt.csv");
+      return true;
+    }
+};
 
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
@@ -236,6 +301,8 @@ int main(int argc, char **argv) {
   traj_problem.GetIMUData();
   traj_problem.SetDeadReckoning();
   traj_problem.OutputTrajectoryResult();
-
+  traj_problem.SetupOptProblem();
+  traj_problem.SolveOptimizationProblem();
+  traj_problem.OutputOptResult();
   return 0;
 }
