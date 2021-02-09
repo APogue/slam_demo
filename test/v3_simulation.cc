@@ -13,6 +13,7 @@
 #include "vec_3d_parameter_block.h"
 #include "quat_parameter_block.h"
 #include "imu_error.h"
+#include <random>
 
 
 #define _USE_MATH_DEFINES
@@ -66,6 +67,12 @@ struct IMU {
 
 };
 
+struct Features {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    Eigen::Vector3d ftr_vec_ = Eigen::Vector3d(0, 0, 0);;
+
+};
 
 Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
     if (q.w() < 0) {
@@ -97,25 +104,44 @@ void create_csv(std::vector<State*> state_vec, const std::string& file_path){
   output_file.close();
 };
 
+void create_ftr_csv(std::vector<Features*> feature_vec_, const std::string& file_path){
+  std::ofstream output_file(file_path);
+  output_file << "p_x,p_y,p_z\n";
+
+  for (size_t i=0; i<feature_vec_.size(); ++i) {
+    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(0)) << ",";
+    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(1)) << ",";
+    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(2)) << std::endl;
+  }
+  output_file.close();
+};
+
+
 class SimSLAM {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // parameters
   int state_length =1000;
+  int feature_length = 4*1000;
   double sigma_g_c = 6.0e-4;
   double sigma_a_c = 2.0e-3;
   double del_t = 0.01;
   double T = 0.0; // time
-  double r = 10.0; // circle radius x-y plane
+  double r = 5.0; // circle radius x-y plane
   double w = .76; // angular velocity
   double r_z = (1.0/20)*r;
-  double w_z = (3.3)*w;
+  double w_z = (2.3)*w;
+  double z_h = 0; // height of the uav
+  double box_xy = 2; // box offset from the circle
+  double box_z = 1; // box offset from uav height
+
   Eigen::Vector3d gravity = Eigen::Vector3d(0, 0, -9.81007);
 
   // create containers
   std::vector<State*> gt_vec_;
   std::vector<IMU*> imu_vec_;
   std::vector<State*> dr_vec_;
+  std::vector<Features*> box_vec_;
   ceres::Problem optimization_problem_;
   ceres::Solver::Options optimization_options_;
   ceres::Solver::Summary optimization_summary_;
@@ -129,7 +155,7 @@ public:
 
         pos(0) = r * cos(w * T);
         pos(1) = r * sin(w * T);
-        pos(2) = r_z * sin(w_z * T) + 3;
+        pos(2) = r_z * sin(w_z * T) + z_h;
 
         vel(0) = -r * w * sin(w * T);
         vel(1) = r * w * cos(w * T);
@@ -226,12 +252,42 @@ public:
       dr_vec_.at(i)->GetRotationBlock()->setEstimate(q_dr);
     }
     add_noise_traj();
-//    dr_vec_.at(state_length-1)->GetPositionBlock()->setEstimate(Eigen::Vector3d(10,10,10));
     return true;
+  }
+  bool BuildFeaturePoints(){
+    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+      Features* ftr_ptr = new Features;
+      ftr_ptr->ftr_vec_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      ftr_ptr->ftr_vec_(1) = (r+box_xy);
+      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      box_vec_.push_back(ftr_ptr);
+    }
+    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+      Features* ftr_ptr = new Features;
+      ftr_ptr->ftr_vec_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      ftr_ptr->ftr_vec_(1) = -(r+box_xy);
+      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      box_vec_.push_back(ftr_ptr);
+    }
+    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+      Features* ftr_ptr = new Features;
+      ftr_ptr->ftr_vec_(0) = (r+box_xy);
+      ftr_ptr->ftr_vec_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      box_vec_.push_back(ftr_ptr);
+    }
+    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+      Features* ftr_ptr = new Features;
+      ftr_ptr->ftr_vec_(0) = -(r+box_xy);
+      ftr_ptr->ftr_vec_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      box_vec_.push_back(ftr_ptr);
+    }
   }
   bool OutputTrajectoryResult(){
     create_csv(gt_vec_, "trajectory.csv");
     create_csv(dr_vec_, "trajectory_dr.csv");
+    create_ftr_csv(box_vec_, "features.csv");
     return true;
   }
   bool SetupOptProblem() {
@@ -240,7 +296,6 @@ public:
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetVelocityBlock()->parameters(), 3);
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetPositionBlock()->parameters(), 3);
     }
-
 
     // imu constraints
     for (size_t i=0; i<imu_vec_.size(); ++i) {
@@ -268,28 +323,28 @@ public:
       return true;
       }
 
-    bool SolveOptimizationProblem() {
+  bool SolveOptimizationProblem() {
 
-      std::cout << "Begin solving the optimization problem." << std::endl;
+    std::cout << "Begin solving the optimization problem." << std::endl;
 
-      optimization_options_.linear_solver_type = ceres::SPARSE_SCHUR;
-      optimization_options_.minimizer_progress_to_stdout = true;
-      optimization_options_.num_threads = 6;
-      optimization_options_.function_tolerance = 1e-10;
-      optimization_options_.parameter_tolerance = 1e-15;
-      optimization_options_.max_num_iterations = 500;
+    optimization_options_.linear_solver_type = ceres::SPARSE_SCHUR;
+    optimization_options_.minimizer_progress_to_stdout = true;
+    optimization_options_.num_threads = 6;
+    optimization_options_.function_tolerance = 1e-10;
+    optimization_options_.parameter_tolerance = 1e-15;
+    optimization_options_.max_num_iterations = 100;
 
 
-      ceres::Solve(optimization_options_, &optimization_problem_, &optimization_summary_);
-      std::cout << optimization_summary_.FullReport() << "\n";
+    ceres::Solve(optimization_options_, &optimization_problem_, &optimization_summary_);
+    std::cout << optimization_summary_.FullReport() << "\n";
 
-      return true;
-    }
+    return true;
+  }
 
-    bool OutputOptResult(){
-      create_csv(dr_vec_, "trajectory_opt.csv");
-      return true;
-    }
+  bool OutputOptResult(){
+    create_csv(dr_vec_, "trajectory_opt.csv");
+    return true;
+  }
 };
 
 int main(int argc, char **argv) {
@@ -300,6 +355,7 @@ int main(int argc, char **argv) {
   traj_problem.SetGroundTruth();
   traj_problem.GetIMUData();
   traj_problem.SetDeadReckoning();
+  traj_problem.BuildFeaturePoints();
   traj_problem.OutputTrajectoryResult();
   traj_problem.SetupOptProblem();
   traj_problem.SolveOptimizationProblem();
