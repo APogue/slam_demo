@@ -288,21 +288,41 @@ public:
     }
   }
   bool ToCameraFrame()  {
-    Eigen::Matrix4d T_cn;
+    Eigen::Matrix4d T_bn;
+    Eigen::Matrix4d T_cb;
+    Eigen::Matrix4d T_nb;
 
     // from body frame to camera frame
-    T_cn.topLeftCorner<3, 3>() = gt_vec_.at(0)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
-    T_cn.topRightCorner<3, 1>()= -1*gt_vec_.at(0)->GetPositionBlock()->estimate();
-    T_cn.bottomLeftCorner<1, 3>().setZero();
+    T_cb << cos(M_PI/2), 0, -sin(M_PI/2), 0,
+            0,            1,  0,            0,
+            sin(M_PI/2), 0,  cos(M_PI/2), 0,
+            0, 0, 0, 1;
+    int n = 999;
+
+    // from navigation to body frame
+    T_bn.topLeftCorner<3, 3>() = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
+    T_bn.topRightCorner<3, 1>()= -1*gt_vec_.at(n)->GetPositionBlock()->estimate();
+    T_bn.bottomLeftCorner<1, 3>().setZero();
+    T_bn.bottomRightCorner<1,1>().setOnes();
+
+
+    // from body frame to navigation frame
+    T_nb.topLeftCorner<3, 3>()  = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix();
+    T_nb.topRightCorner<3, 1>() = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix()*
+            gt_vec_.at(n)->GetPositionBlock()->estimate();
+    T_nb.bottomLeftCorner<1, 3>().setZero();
+    T_nb.bottomRightCorner<1,1>().setOnes();
 
     for (unsigned i=0; i< feature_length; i++) { //x walls first
       Landmarks* rot_ptr = new Landmarks;
       // homogeneous transformation of the landmark to camera frame
-      rot_ptr-> landmark_pos_ = T_cn * lmk_vec_.at(i)->landmark_pos_;
-      if(rot_ptr-> landmark_pos_(0)>0) {
+      rot_ptr-> landmark_pos_ = T_cb*T_bn * lmk_vec_.at(i)->landmark_pos_;
+      if(rot_ptr-> landmark_pos_(2)>0) {
+        rot_ptr-> landmark_pos_ =  T_nb*T_cb.inverse()*rot_ptr->landmark_pos_;
         prot_lmk_vec_.push_back(rot_ptr);
       }
       else{
+        rot_ptr-> landmark_pos_ =  T_nb*T_cb.inverse()*rot_ptr->landmark_pos_;
         nrot_lmk_vec_.push_back(rot_ptr);
       }
     }
