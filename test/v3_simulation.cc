@@ -67,10 +67,11 @@ struct IMU {
 
 };
 
-struct Features {
+struct Landmarks {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Eigen::Vector3d ftr_vec_ = Eigen::Vector3d(0, 0, 0);;
+    Eigen::Vector4d landmark_pos_ = Eigen::Vector4d(0, 0, 0, 1);
+    Eigen::Vector4d rot_landmark_pos_ = Eigen::Vector4d(0, 0, 0, 1);
 
 };
 
@@ -104,14 +105,14 @@ void create_csv(std::vector<State*> state_vec, const std::string& file_path){
   output_file.close();
 };
 
-void create_ftr_csv(std::vector<Features*> feature_vec_, const std::string& file_path){
+void create_lmk_csv(std::vector<Landmarks*> landmark_vec, const std::string& file_path){
   std::ofstream output_file(file_path);
   output_file << "p_x,p_y,p_z\n";
 
-  for (size_t i=0; i<feature_vec_.size(); ++i) {
-    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(0)) << ",";
-    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(1)) << ",";
-    output_file << std::to_string(feature_vec_.at(i)->ftr_vec_(2)) << std::endl;
+  for (size_t i=0; i<landmark_vec.size(); ++i) {
+    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(0)) << ",";
+    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(1)) << ",";
+    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(2)) << std::endl;
   }
   output_file.close();
 };
@@ -122,7 +123,7 @@ class SimSLAM {
 
   // parameters
   int state_length =1000;
-  int feature_length = 4*1000;
+  int feature_length = 4*500;
   double sigma_g_c = 6.0e-4;
   double sigma_a_c = 2.0e-3;
   double del_t = 0.01;
@@ -141,7 +142,9 @@ class SimSLAM {
   std::vector<State*> gt_vec_;
   std::vector<IMU*> imu_vec_;
   std::vector<State*> dr_vec_;
-  std::vector<Features*> box_vec_;
+  std::vector<Landmarks*> lmk_vec_;
+  std::vector<Landmarks*> prot_lmk_vec_;
+  std::vector<Landmarks*> nrot_lmk_vec_;
   ceres::Problem optimization_problem_;
   ceres::Solver::Options optimization_options_;
   ceres::Solver::Summary optimization_summary_;
@@ -254,42 +257,66 @@ public:
     add_noise_traj();
     return true;
   }
-  bool BuildFeaturePoints(){
+  bool BuildLandmarkPoints(){
     for (unsigned i=0; i< feature_length/4; i++) { //x walls first
-      Features* ftr_ptr = new Features;
-      ftr_ptr->ftr_vec_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
-      ftr_ptr->ftr_vec_(1) = (r+box_xy);
-      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      box_vec_.push_back(ftr_ptr);
+      Landmarks* lmk_ptr = new Landmarks;
+      lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      lmk_ptr->landmark_pos_(1) = (r+box_xy);
+      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      lmk_vec_.push_back(lmk_ptr);
     }
     for (unsigned i=0; i< feature_length/4; i++) { //x walls first
-      Features* ftr_ptr = new Features;
-      ftr_ptr->ftr_vec_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
-      ftr_ptr->ftr_vec_(1) = -(r+box_xy);
-      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      box_vec_.push_back(ftr_ptr);
+      Landmarks* lmk_ptr = new Landmarks;
+      lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      lmk_ptr->landmark_pos_(1) = -(r+box_xy);
+      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      lmk_vec_.push_back(lmk_ptr);
     }
     for (unsigned i=0; i< feature_length/4; i++) { //x walls first
-      Features* ftr_ptr = new Features;
-      ftr_ptr->ftr_vec_(0) = (r+box_xy);
-      ftr_ptr->ftr_vec_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      box_vec_.push_back(ftr_ptr);
+      Landmarks* lmk_ptr = new Landmarks;
+      lmk_ptr->landmark_pos_(0) = (r+box_xy);
+      lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      lmk_vec_.push_back(lmk_ptr);
     }
     for (unsigned i=0; i< feature_length/4; i++) { //x walls first
-      Features* ftr_ptr = new Features;
-      ftr_ptr->ftr_vec_(0) = -(r+box_xy);
-      ftr_ptr->ftr_vec_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      ftr_ptr->ftr_vec_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      box_vec_.push_back(ftr_ptr);
+      Landmarks* lmk_ptr = new Landmarks;
+      lmk_ptr->landmark_pos_(0) = -(r+box_xy);
+      lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      lmk_vec_.push_back(lmk_ptr);
     }
   }
+  bool ToCameraFrame()  {
+    Eigen::Matrix4d T_cn;
+
+    // from body frame to camera frame
+    T_cn.topLeftCorner<3, 3>() = gt_vec_.at(0)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
+    T_cn.topRightCorner<3, 1>()= -1*gt_vec_.at(0)->GetPositionBlock()->estimate();
+    T_cn.bottomLeftCorner<1, 3>().setZero();
+
+    for (unsigned i=0; i< feature_length; i++) { //x walls first
+      Landmarks* rot_ptr = new Landmarks;
+      // homogeneous transformation of the landmark to camera frame
+      rot_ptr-> landmark_pos_ = T_cn * lmk_vec_.at(i)->landmark_pos_;
+      if(rot_ptr-> landmark_pos_(0)>0) {
+        prot_lmk_vec_.push_back(rot_ptr);
+      }
+      else{
+        nrot_lmk_vec_.push_back(rot_ptr);
+      }
+    }
+  }
+
   bool OutputTrajectoryResult(){
     create_csv(gt_vec_, "trajectory.csv");
     create_csv(dr_vec_, "trajectory_dr.csv");
-    create_ftr_csv(box_vec_, "features.csv");
+    create_lmk_csv(lmk_vec_, "landmarks.csv");
+    create_lmk_csv(prot_lmk_vec_, "prot_landmarks.csv");
+    create_lmk_csv(nrot_lmk_vec_, "nrot_landmarks.csv");
     return true;
   }
+
   bool SetupOptProblem() {
     for (size_t i=0; i<dr_vec_.size(); ++i) {
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetRotationBlock()->parameters(), 4);
@@ -355,7 +382,8 @@ int main(int argc, char **argv) {
   traj_problem.SetGroundTruth();
   traj_problem.GetIMUData();
   traj_problem.SetDeadReckoning();
-  traj_problem.BuildFeaturePoints();
+  traj_problem.BuildLandmarkPoints();
+  traj_problem.ToCameraFrame();
   traj_problem.OutputTrajectoryResult();
   traj_problem.SetupOptProblem();
   traj_problem.SolveOptimizationProblem();
