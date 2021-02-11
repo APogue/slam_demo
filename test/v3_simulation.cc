@@ -77,7 +77,10 @@ struct ObservationData {
     ObservationData(double timestamp) {
       timestamp_ = timestamp;
     }
-
+    Eigen::Matrix2d cov() {
+      double sigma_2 = size_ * size_ / 64.0;
+      return sigma_2 * Eigen::Matrix2d::Identity();
+    }
     double timestamp_;
     size_t landmark_id_;
     Eigen::Vector2d feature_pos_;
@@ -131,8 +134,8 @@ class SimSLAM {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // parameters
-  int state_length =100;
-  int feature_length = 4*250;
+  int state_length =1000;
+  int landmark_length = 4*350;
   double sigma_g_c = 6.0e-4;
   double sigma_a_c = 2.0e-3;
   double del_t = 0.01;
@@ -145,7 +148,7 @@ class SimSLAM {
   double box_xy = 2;  // box offset from the circle
   double box_z = 1;   // box offset from uav height
   double du = 500.0;  // image dimension
-  double dv = 500.0;
+  double dv = 1000.0;
   double fu = 500.0;  // focal length
   double fv = 500.0;
   double cu = 0.0;    // principal point
@@ -160,6 +163,7 @@ class SimSLAM {
   std::vector<Landmarks*> lmk_vec_;
   std::vector<Landmarks*> prot_lmk_vec_;
   std::vector<Landmarks*> nrot_lmk_vec_;
+  std::vector<std::vector<ObservationData*>>  observation_vec_;
   ceres::Problem optimization_problem_;
   ceres::Solver::Options optimization_options_;
   ceres::Solver::Summary optimization_summary_;
@@ -273,28 +277,28 @@ public:
     return true;
   }
   bool BuildLandmarkPoints(){
-    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
       Landmarks* lmk_ptr = new Landmarks;
       lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
       lmk_ptr->landmark_pos_(1) = (r+box_xy);
       lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
       lmk_vec_.push_back(lmk_ptr);
     }
-    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
       Landmarks* lmk_ptr = new Landmarks;
       lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
       lmk_ptr->landmark_pos_(1) = -(r+box_xy);
       lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
       lmk_vec_.push_back(lmk_ptr);
     }
-    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
       Landmarks* lmk_ptr = new Landmarks;
       lmk_ptr->landmark_pos_(0) = (r+box_xy);
       lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
       lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
       lmk_vec_.push_back(lmk_ptr);
     }
-    for (unsigned i=0; i< feature_length/4; i++) { //x walls first
+    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
       Landmarks* lmk_ptr = new Landmarks;
       lmk_ptr->landmark_pos_(0) = -(r+box_xy);
       lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
@@ -302,7 +306,7 @@ public:
       lmk_vec_.push_back(lmk_ptr);
     }
   }
-  bool ToCameraFrame()  {
+  bool CreateObservation()  {
     Eigen::Matrix4d T_bn;
     Eigen::Matrix4d T_cb;
     Eigen::Matrix4d T_nb;
@@ -312,6 +316,7 @@ public:
             0,            1,  0,            0,
             sin(M_PI/2), 0,  cos(M_PI/2), 0,
             0, 0, 0, 1;
+    observation_vec_.resize(state_length);
     for (unsigned i=0; i< state_length; i++) { //x walls first
       // from navigation to body frame
       T_bn.topLeftCorner<3, 3>() = gt_vec_.at(i)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
@@ -326,8 +331,8 @@ public:
       T_nb.topRightCorner<3, 1>() = gt_vec_.at(i)->GetPositionBlock()->estimate();
       T_nb.bottomLeftCorner<1, 3>().setZero();
       T_nb.bottomRightCorner<1, 1>().setOnes();
-//      int count = 0;
-      for (unsigned k = 0; k < feature_length; k++) { //x walls first
+      int count = 0;
+      for (unsigned k = 0; k < landmark_length; k++) { //x walls first
         // homogeneous transformation of the landmark to camera frame
         Eigen::Vector4d landmark_c = T_cb * T_bn * lmk_vec_.at(k)->landmark_pos_;
         Eigen::Vector2d feature_pt;
@@ -336,8 +341,13 @@ public:
           feature_pt(1) = fv * landmark_c(1) / landmark_c(2) + cv;
           // check whether this point is in the frame
           if (abs(feature_pt(0)) <= du/2 && abs(feature_pt(1)) <= dv/2) {
+            T = gt_vec_.at(i)->GetTimestamp();
+            ObservationData* feature_obs_ptr = new ObservationData(T);
+            feature_obs_ptr->landmark_id_ = k;
+            feature_obs_ptr->feature_pos_ = feature_pt;
+            observation_vec_.at(i).push_back(feature_obs_ptr);
             prot_lmk_vec_.push_back(lmk_vec_.at(k));
-//            count++;
+            count++;
           } else {
 
             nrot_lmk_vec_.push_back(lmk_vec_.at(k));
@@ -347,11 +357,11 @@ public:
           nrot_lmk_vec_.push_back(lmk_vec_.at(k));
         }
       }
-//      std::cout<<"landmark count"<< " " << count <<" " <<
-//      "position x"<<" " <<gt_vec_.at(i)->GetPositionBlock()->estimate()(0)
-//      <<"position y" <<" " <<gt_vec_.at(i)->GetPositionBlock()->estimate()(1)
-//      << std::endl;
+      std::cout<<"sub observation vec size"<< " " << observation_vec_.at(i).size()<<std::endl;
+      std::cout<<"count"<< " " << count<<std::endl;
+
     }
+    std::cout<<"observation vec size"<<" "<< observation_vec_.size()<<std::endl;
   }
 
   bool OutputTrajectoryResult(){
@@ -405,7 +415,7 @@ public:
     optimization_options_.num_threads = 6;
     optimization_options_.function_tolerance = 1e-10;
     optimization_options_.parameter_tolerance = 1e-15;
-    optimization_options_.max_num_iterations = 100;
+    optimization_options_.max_num_iterations = 50;
 
 
     ceres::Solve(optimization_options_, &optimization_problem_, &optimization_summary_);
@@ -429,7 +439,7 @@ int main(int argc, char **argv) {
   traj_problem.GetIMUData();
   traj_problem.SetDeadReckoning();
   traj_problem.BuildLandmarkPoints();
-  traj_problem.ToCameraFrame();
+  traj_problem.CreateObservation();
   traj_problem.OutputTrajectoryResult();
   traj_problem.SetupOptProblem();
   traj_problem.SolveOptimizationProblem();
