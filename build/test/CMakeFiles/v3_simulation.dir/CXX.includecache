@@ -77,8 +77,6 @@ quat_parameter_block.h
 /home/alexie/Documents/slam_demo/test/quat_parameter_block.h
 imu_error.h
 /home/alexie/Documents/slam_demo/test/imu_error.h
-random
--
 
 /usr/include/eigen3/Eigen/Cholesky
 Core

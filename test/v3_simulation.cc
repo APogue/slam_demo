@@ -13,8 +13,6 @@
 #include "vec_3d_parameter_block.h"
 #include "quat_parameter_block.h"
 #include "imu_error.h"
-#include <random>
-
 
 #define _USE_MATH_DEFINES
 
@@ -71,8 +69,24 @@ struct Landmarks {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     Eigen::Vector4d landmark_pos_ = Eigen::Vector4d(0, 0, 0, 1);
-    Eigen::Vector4d rot_landmark_pos_ = Eigen::Vector4d(0, 0, 0, 1);
 
+};
+struct ObservationData {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    ObservationData(double timestamp) {
+      timestamp_ = timestamp;
+    }
+
+    Eigen::Matrix2d cov() {
+      double sigma_2 = size_ * size_ / 64.0;
+      return sigma_2 * Eigen::Matrix2d::Identity();
+    }
+
+    double timestamp_;
+    size_t landmark_id_;
+    Eigen::Vector2d feature_pos_;
+    double size_;
 };
 
 Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
@@ -122,8 +136,8 @@ class SimSLAM {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // parameters
-  int state_length =1000;
-  int feature_length = 4*500;
+  int state_length =100;
+  int feature_length = 4*250;
   double sigma_g_c = 6.0e-4;
   double sigma_a_c = 2.0e-3;
   double del_t = 0.01;
@@ -133,8 +147,14 @@ class SimSLAM {
   double r_z = (1.0/20)*r;
   double w_z = (2.3)*w;
   double z_h = 0; // height of the uav
-  double box_xy = 2; // box offset from the circle
-  double box_z = 1; // box offset from uav height
+  double box_xy = 2;  // box offset from the circle
+  double box_z = 1;   // box offset from uav height
+  double du = 500.0;  // image dimension
+  double dv = 500.0;
+  double fu = 500.0;  // focal length
+  double fv = 500.0;
+  double cu = 0.0;    // principal point
+  double cv = 0.0;
 
   Eigen::Vector3d gravity = Eigen::Vector3d(0, 0, -9.81007);
 
@@ -297,34 +317,45 @@ public:
             0,            1,  0,            0,
             sin(M_PI/2), 0,  cos(M_PI/2), 0,
             0, 0, 0, 1;
-    int n = 999;
+    for (unsigned i=0; i< state_length; i++) { //x walls first
+      // from navigation to body frame
+      T_bn.topLeftCorner<3, 3>() = gt_vec_.at(i)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
+      T_bn.topRightCorner<3, 1>() = -1 * gt_vec_.at(i)->GetRotationBlock()->estimate().toRotationMatrix().transpose() *
+                                    gt_vec_.at(i)->GetPositionBlock()->estimate();
+      T_bn.bottomLeftCorner<1, 3>().setZero();
+      T_bn.bottomRightCorner<1, 1>().setOnes();
 
-    // from navigation to body frame
-    T_bn.topLeftCorner<3, 3>() = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix().transpose();
-    T_bn.topRightCorner<3, 1>()= -1*gt_vec_.at(n)->GetPositionBlock()->estimate();
-    T_bn.bottomLeftCorner<1, 3>().setZero();
-    T_bn.bottomRightCorner<1,1>().setOnes();
 
+      // from body frame to navigation frame
+      T_nb.topLeftCorner<3, 3>() = gt_vec_.at(i)->GetRotationBlock()->estimate().toRotationMatrix();
+      T_nb.topRightCorner<3, 1>() = gt_vec_.at(i)->GetPositionBlock()->estimate();
+      T_nb.bottomLeftCorner<1, 3>().setZero();
+      T_nb.bottomRightCorner<1, 1>().setOnes();
+//      int count = 0;
+      for (unsigned k = 0; k < feature_length; k++) { //x walls first
+        // homogeneous transformation of the landmark to camera frame
+        Eigen::Vector4d landmark_c = T_cb * T_bn * lmk_vec_.at(k)->landmark_pos_;
+        Eigen::Vector2d feature_pt;
+        if (landmark_c(2) > 0) {
+          feature_pt(0) = fu * landmark_c(0) / landmark_c(2) + cu;
+          feature_pt(1) = fv * landmark_c(1) / landmark_c(2) + cv;
+          // check whether this point is in the frame
+          if (abs(feature_pt(0)) <= du/2 && abs(feature_pt(1)) <= dv/2) {
+            prot_lmk_vec_.push_back(lmk_vec_.at(k));
+//            count++;
+          } else {
 
-    // from body frame to navigation frame
-    T_nb.topLeftCorner<3, 3>()  = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix();
-    T_nb.topRightCorner<3, 1>() = gt_vec_.at(n)->GetRotationBlock()->estimate().toRotationMatrix()*
-            gt_vec_.at(n)->GetPositionBlock()->estimate();
-    T_nb.bottomLeftCorner<1, 3>().setZero();
-    T_nb.bottomRightCorner<1,1>().setOnes();
+            nrot_lmk_vec_.push_back(lmk_vec_.at(k));
+          }
 
-    for (unsigned i=0; i< feature_length; i++) { //x walls first
-      Landmarks* rot_ptr = new Landmarks;
-      // homogeneous transformation of the landmark to camera frame
-      rot_ptr-> landmark_pos_ = T_cb*T_bn * lmk_vec_.at(i)->landmark_pos_;
-      if(rot_ptr-> landmark_pos_(2)>0) {
-        rot_ptr-> landmark_pos_ =  T_nb*T_cb.inverse()*rot_ptr->landmark_pos_;
-        prot_lmk_vec_.push_back(rot_ptr);
+        } else {
+          nrot_lmk_vec_.push_back(lmk_vec_.at(k));
+        }
       }
-      else{
-        rot_ptr-> landmark_pos_ =  T_nb*T_cb.inverse()*rot_ptr->landmark_pos_;
-        nrot_lmk_vec_.push_back(rot_ptr);
-      }
+//      std::cout<<"landmark count"<< " " << count <<" " <<
+//      "position x"<<" " <<gt_vec_.at(i)->GetPositionBlock()->estimate()(0)
+//      <<"position y" <<" " <<gt_vec_.at(i)->GetPositionBlock()->estimate()(1)
+//      << std::endl;
     }
   }
 
