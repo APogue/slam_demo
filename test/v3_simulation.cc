@@ -78,11 +78,6 @@ struct ObservationData {
       timestamp_ = timestamp;
     }
 
-    Eigen::Matrix2d cov() {
-      double sigma_2 = size_ * size_ / 64.0;
-      return sigma_2 * Eigen::Matrix2d::Identity();
-    }
-
     double timestamp_;
     size_t landmark_id_;
     Eigen::Vector2d feature_pos_;
