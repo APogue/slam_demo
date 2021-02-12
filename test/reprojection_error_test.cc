@@ -140,7 +140,6 @@ int main(int argc, char **argv) {
     Eigen::Vector2d keypoint = Project(landmark_c, fu, fv, cu, cv);
 
     keypoint += noise_deviation * Eigen::Vector2d::Random();
-
     ceres::CostFunction* cost_function = new ReprojectionError(keypoint,
                                                                T_bc.T(),
                                                                fu, fv,

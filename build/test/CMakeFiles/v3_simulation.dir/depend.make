@@ -4,6 +4,7 @@
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/imu_error.h
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/parameter_block.h
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/quat_parameter_block.h
+test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/reprojection_error.h
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/sized_parameter_block.h
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/so3.h
 test/CMakeFiles/v3_simulation.dir/v3_simulation.cc.o: ../lib/vec_3d_parameter_block.h

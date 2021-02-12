@@ -9,9 +9,11 @@
 #include <ceres/ceres.h>
 #include <Eigen/Core>
 #include <fstream>
+#include <reprojection_error.h>
 #include "transformation.h"
 #include "vec_3d_parameter_block.h"
 #include "quat_parameter_block.h"
+#include "imu_error.h"
 #include "imu_error.h"
 
 #define _USE_MATH_DEFINES
@@ -65,10 +67,16 @@ struct IMU {
 
 };
 
-struct Landmarks {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    Eigen::Vector4d landmark_pos_ = Eigen::Vector4d(0, 0, 0, 1);
+class Landmarks {
+  public:
+    Landmarks() {
+      landmark_ptr_ = new Vec3dParameterBlock();
+    }
+    ~Landmarks() {
+      delete [] landmark_ptr_;
+    }
+//  private:
+    Vec3dParameterBlock* landmark_ptr_;
 
 };
 struct ObservationData {
@@ -122,9 +130,9 @@ void create_lmk_csv(std::vector<Landmarks*> landmark_vec, const std::string& fil
   output_file << "p_x,p_y,p_z\n";
 
   for (size_t i=0; i<landmark_vec.size(); ++i) {
-    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(0)) << ",";
-    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(1)) << ",";
-    output_file << std::to_string(landmark_vec.at(i)->landmark_pos_(2)) << std::endl;
+    output_file << std::to_string(landmark_vec.at(i)->landmark_ptr_->estimate()(0)) << ",";
+    output_file << std::to_string(landmark_vec.at(i)->landmark_ptr_->estimate()(1)) << ",";
+    output_file << std::to_string(landmark_vec.at(i)->landmark_ptr_->estimate()(2)) << std::endl;
   }
   output_file.close();
 };
@@ -134,8 +142,8 @@ class SimSLAM {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // parameters
-  int state_length =1000;
-  int landmark_length = 4*350;
+  int state_length =100;
+  int landmark_length = 4*50;
   double sigma_g_c = 6.0e-4;
   double sigma_a_c = 2.0e-3;
   double del_t = 0.01;
@@ -160,9 +168,10 @@ class SimSLAM {
   std::vector<State*> gt_vec_;
   std::vector<IMU*> imu_vec_;
   std::vector<State*> dr_vec_;
-  std::vector<Landmarks*> lmk_vec_;
-  std::vector<Landmarks*> prot_lmk_vec_;
-  std::vector<Landmarks*> nrot_lmk_vec_;
+  std::vector<Landmarks*> landmark_vec_;
+  std::vector<Landmarks*> gt_landmark_vec_;
+  std::vector<Landmarks*> prot_landmark_vec_;
+  std::vector<Landmarks*> nrot_landmark_vec_;
   std::vector<std::vector<ObservationData*>>  observation_vec_;
   ceres::Problem optimization_problem_;
   ceres::Solver::Options optimization_options_;
@@ -273,37 +282,47 @@ public:
       dr_vec_.at(i)->GetVelocityBlock()->setEstimate(v_dr);
       dr_vec_.at(i)->GetRotationBlock()->setEstimate(q_dr);
     }
-    add_noise_traj();
+//    add_noise_traj(); // add noise to check the optimization
     return true;
   }
   bool BuildLandmarkPoints(){
+    Eigen::Vector3d lmk_pos;
     for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
-      Landmarks* lmk_ptr = new Landmarks;
-      lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
-      lmk_ptr->landmark_pos_(1) = (r+box_xy);
-      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      lmk_vec_.push_back(lmk_ptr);
+      landmark_vec_.push_back(new Landmarks);
+      gt_landmark_vec_.push_back(new Landmarks);
+      lmk_pos(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      lmk_pos(1) = (r+box_xy);
+      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos + .5*Eigen::Vector3d::Random()); //triangularization noise
+      gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
+//      std::cout<<"landmark"<<" "<< 2*gt_landmark_vec_.at(i)->landmark_ptr_->estimate()<<std::endl;
     }
-    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
-      Landmarks* lmk_ptr = new Landmarks;
-      lmk_ptr->landmark_pos_(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
-      lmk_ptr->landmark_pos_(1) = -(r+box_xy);
-      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      lmk_vec_.push_back(lmk_ptr);
+    for (unsigned i=landmark_length/4; i<landmark_length/2; i++) { //x walls first
+      landmark_vec_.push_back(new Landmarks);
+      gt_landmark_vec_.push_back(new Landmarks);
+      lmk_pos(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
+      lmk_pos(1) = -(r+box_xy);
+      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
-    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
-      Landmarks* lmk_ptr = new Landmarks;
-      lmk_ptr->landmark_pos_(0) = (r+box_xy);
-      lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      lmk_vec_.push_back(lmk_ptr);
+    for (unsigned i=landmark_length/2; i< 3*landmark_length/4; i++) { //x walls first
+      landmark_vec_.push_back(new Landmarks);
+      gt_landmark_vec_.push_back(new Landmarks);
+      lmk_pos(0) = (r+box_xy);
+      lmk_pos(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
-    for (unsigned i=0; i< landmark_length/4; i++) { //x walls first
-      Landmarks* lmk_ptr = new Landmarks;
-      lmk_ptr->landmark_pos_(0) = -(r+box_xy);
-      lmk_ptr->landmark_pos_(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      lmk_ptr->landmark_pos_(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      lmk_vec_.push_back(lmk_ptr);
+    for (unsigned i=3*landmark_length/4; i< landmark_length; i++) { //x walls first
+      landmark_vec_.push_back(new Landmarks);
+      gt_landmark_vec_.push_back(new Landmarks);
+      lmk_pos(0) = -(r+box_xy);
+      lmk_pos(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
+      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
   }
   bool CreateObservation()  {
@@ -334,7 +353,9 @@ public:
       int count = 0;
       for (unsigned k = 0; k < landmark_length; k++) { //x walls first
         // homogeneous transformation of the landmark to camera frame
-        Eigen::Vector4d landmark_c = T_cb * T_bn * lmk_vec_.at(k)->landmark_pos_;
+        Eigen::Vector4d homogenous_lmk_vec = Eigen::Vector4d(0, 0, 0, 1);
+        homogenous_lmk_vec.head(3) = gt_landmark_vec_.at(k)->landmark_ptr_->estimate();
+        Eigen::Vector4d landmark_c = T_cb * T_bn * homogenous_lmk_vec;
         Eigen::Vector2d feature_pt;
         if (landmark_c(2) > 0) {
           feature_pt(0) = fu * landmark_c(0) / landmark_c(2) + cu;
@@ -346,38 +367,49 @@ public:
             feature_obs_ptr->landmark_id_ = k;
             feature_obs_ptr->feature_pos_ = feature_pt;
             observation_vec_.at(i).push_back(feature_obs_ptr);
-            prot_lmk_vec_.push_back(lmk_vec_.at(k));
+//            prot_landmark_vec_.push_back(gt_landmark_vec_.at(k));
+//            std::cout<<"landmarks"<<" "<< gt_landmark_vec_.at(k)->landmark_ptr_->estimate().size()<<std::endl;
             count++;
-          } else {
+            }
+//          else {
+//
+//            nrot_landmark_vec_.push_back(gt_landmark_vec_.at(k));
+//          }
 
-            nrot_lmk_vec_.push_back(lmk_vec_.at(k));
-          }
-
-        } else {
-          nrot_lmk_vec_.push_back(lmk_vec_.at(k));
         }
+//        else {
+//          nrot_landmark_vec_.push_back(gt_landmark_vec_.at(k));
+//        }
       }
-      std::cout<<"sub observation vec size"<< " " << observation_vec_.at(i).size()<<std::endl;
-      std::cout<<"count"<< " " << count<<std::endl;
+//      std::cout<<"sub observation vec size"<< " " << observation_vec_.at(i).size()<<std::endl;
+//      std::cout<<"count"<< " " << count<<std::endl;
 
     }
-    std::cout<<"observation vec size"<<" "<< observation_vec_.size()<<std::endl;
+//    std::cout<<"observation vec size"<<" "<< observation_vec_.size()<<std::endl;
   }
 
   bool OutputTrajectoryResult(){
     create_csv(gt_vec_, "trajectory.csv");
     create_csv(dr_vec_, "trajectory_dr.csv");
-    create_lmk_csv(lmk_vec_, "landmarks.csv");
-    create_lmk_csv(prot_lmk_vec_, "prot_landmarks.csv");
-    create_lmk_csv(nrot_lmk_vec_, "nrot_landmarks.csv");
+    create_lmk_csv(gt_landmark_vec_, "landmarks.csv");
+//    create_lmk_csv(prot_landmark_vec_, "prot_landmarks.csv");
+//    create_lmk_csv(nrot_landmark_vec_, "nrot_landmarks.csv");
     return true;
   }
 
   bool SetupOptProblem() {
+    Eigen::Matrix4d T_cb;
+    T_cb << cos(M_PI/2), 0, -sin(M_PI/2), 0,
+            0,            1,  0,            0,
+            sin(M_PI/2), 0,  cos(M_PI/2), 0,
+            0, 0, 0, 1;
     for (size_t i=0; i<dr_vec_.size(); ++i) {
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetRotationBlock()->parameters(), 4);
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetVelocityBlock()->parameters(), 3);
       optimization_problem_.AddParameterBlock(dr_vec_.at(i)->GetPositionBlock()->parameters(), 3);
+    }
+    for (size_t i=0; i<landmark_vec_.size(); ++i) {
+      optimization_problem_.AddParameterBlock(landmark_vec_.at(i)->landmark_ptr_->parameters(), 3);
     }
 
     // imu constraints
@@ -398,6 +430,27 @@ public:
                                              dr_vec_.at(i)->GetRotationBlock()->parameters(),
                                              dr_vec_.at(i)->GetVelocityBlock()->parameters(),
                                              dr_vec_.at(i)->GetPositionBlock()->parameters());
+    }
+    // observation constraints
+    for (size_t i=0; i<observation_vec_.size(); ++i) {
+      for (size_t j=0; j<observation_vec_.at(i).size(); ++j) {
+
+        size_t landmark_idx = observation_vec_.at(i).at(j)->landmark_id_;
+//        std::cout<<"ID"<<" "<<observation_vec_.at(i).at(j)->landmark_id_<<std::endl;
+//        std::cout<<"Pos UV"<<" "<<observation_vec_.at(i).at(j)->feature_pos_<<std::endl;
+//        std::cout<<"POS XYZ"<<" "<<landmark_vec_.at(landmark_idx)->landmark_ptr_->estimate()<<std::endl;
+        ceres::CostFunction* cost_function = new ReprojectionError(observation_vec_.at(i).at(j)->feature_pos_,
+                                                                   T_cb.transpose(),
+                                                                   fu, fv,
+                                                                   cu, cv,
+                                                                   observation_vec_.at(i).at(j)->cov());
+
+        optimization_problem_.AddResidualBlock(cost_function,
+                                               NULL, //loss_function_ptr_,
+                                               dr_vec_.at(i)->GetRotationBlock()->parameters(),
+                                               dr_vec_.at(i)->GetPositionBlock()->parameters(),
+                                               landmark_vec_.at(landmark_idx)->landmark_ptr_->parameters());
+      }
     }
       optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetRotationBlock()->parameters());
       optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetVelocityBlock()->parameters());

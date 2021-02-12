@@ -28,6 +28,12 @@ Eigen/Geometry
 sized_parameter_block.h
 ../lib/sized_parameter_block.h
 
+../lib/reprojection_error.h
+ceres/ceres.h
+-
+so3.h
+../lib/so3.h
+
 ../lib/sized_parameter_block.h
 stdio.h
 -
@@ -69,12 +75,16 @@ Eigen/Core
 -
 fstream
 -
+reprojection_error.h
+-
 transformation.h
 /home/alexie/Documents/slam_demo/test/transformation.h
 vec_3d_parameter_block.h
 /home/alexie/Documents/slam_demo/test/vec_3d_parameter_block.h
 quat_parameter_block.h
 /home/alexie/Documents/slam_demo/test/quat_parameter_block.h
+imu_error.h
+/home/alexie/Documents/slam_demo/test/imu_error.h
 imu_error.h
 /home/alexie/Documents/slam_demo/test/imu_error.h
 
