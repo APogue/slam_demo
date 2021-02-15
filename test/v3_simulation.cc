@@ -152,7 +152,7 @@ class SimSLAM {
   double w = .76; // angular velocity
   double r_z = (1.0/20)*r;
   double w_z = (2.3)*w;
-  double z_h = 0; // height of the uav
+  double z_h = 0.0; // height of the uav
   double box_xy = 2;  // box offset from the circle
   double box_z = 1;   // box offset from uav height
   double du = 500.0;  // image dimension
