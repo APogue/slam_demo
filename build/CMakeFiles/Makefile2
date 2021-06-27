@@ -73,18 +73,21 @@ CMAKE_BINARY_DIR = /home/alexie/Documents/slam_demo/build
 
 # The main recursive "all" target.
 all: lib/all
+all: sim/all
 all: test/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
 preinstall: lib/preinstall
+preinstall: sim/preinstall
 preinstall: test/preinstall
 
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: lib/clean
+clean: sim/clean
 clean: test/clean
 
 .PHONY : clean
@@ -106,6 +109,24 @@ lib/preinstall:
 lib/clean: lib/CMakeFiles/lib.dir/clean
 
 .PHONY : lib/clean
+
+#=============================================================================
+# Directory level rules for directory sim
+
+# Recursive "all" directory target.
+sim/all: sim/CMakeFiles/sim_opt_app.dir/all
+
+.PHONY : sim/all
+
+# Recursive "preinstall" directory target.
+sim/preinstall:
+
+.PHONY : sim/preinstall
+
+# Recursive "clean" directory target.
+sim/clean: sim/CMakeFiles/sim_opt_app.dir/clean
+
+.PHONY : sim/clean
 
 #=============================================================================
 # Directory level rules for directory test
@@ -161,6 +182,33 @@ lib: lib/CMakeFiles/lib.dir/rule
 lib/CMakeFiles/lib.dir/clean:
 	$(MAKE) $(MAKESILENT) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/clean
 .PHONY : lib/CMakeFiles/lib.dir/clean
+
+#=============================================================================
+# Target rules for target sim/CMakeFiles/sim_opt_app.dir
+
+# All Build rule for target.
+sim/CMakeFiles/sim_opt_app.dir/all: lib/CMakeFiles/lib.dir/all
+	$(MAKE) $(MAKESILENT) -f sim/CMakeFiles/sim_opt_app.dir/build.make sim/CMakeFiles/sim_opt_app.dir/depend
+	$(MAKE) $(MAKESILENT) -f sim/CMakeFiles/sim_opt_app.dir/build.make sim/CMakeFiles/sim_opt_app.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=8,9 "Built target sim_opt_app"
+.PHONY : sim/CMakeFiles/sim_opt_app.dir/all
+
+# Build rule for subdir invocation for target.
+sim/CMakeFiles/sim_opt_app.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sim/CMakeFiles/sim_opt_app.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexie/Documents/slam_demo/build/CMakeFiles 0
+.PHONY : sim/CMakeFiles/sim_opt_app.dir/rule
+
+# Convenience name for target.
+sim_opt_app: sim/CMakeFiles/sim_opt_app.dir/rule
+
+.PHONY : sim_opt_app
+
+# clean rule for target.
+sim/CMakeFiles/sim_opt_app.dir/clean:
+	$(MAKE) $(MAKESILENT) -f sim/CMakeFiles/sim_opt_app.dir/build.make sim/CMakeFiles/sim_opt_app.dir/clean
+.PHONY : sim/CMakeFiles/sim_opt_app.dir/clean
 
 #=============================================================================
 # Target rules for target test/CMakeFiles/reprojection_error_test.dir
@@ -223,7 +271,7 @@ test/CMakeFiles/pre_int_imu_error_test.dir/clean:
 test/CMakeFiles/simulation.dir/all: lib/CMakeFiles/lib.dir/all
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/depend
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation.dir/build.make test/CMakeFiles/simulation.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=8,9 "Built target simulation"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=10,11 "Built target simulation"
 .PHONY : test/CMakeFiles/simulation.dir/all
 
 # Build rule for subdir invocation for target.
@@ -277,7 +325,7 @@ test/CMakeFiles/imu_error_test.dir/clean:
 test/CMakeFiles/simulation_v2.dir/all: lib/CMakeFiles/lib.dir/all
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/depend
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/simulation_v2.dir/build.make test/CMakeFiles/simulation_v2.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=10,11 "Built target simulation_v2"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=12,13 "Built target simulation_v2"
 .PHONY : test/CMakeFiles/simulation_v2.dir/all
 
 # Build rule for subdir invocation for target.
@@ -304,7 +352,7 @@ test/CMakeFiles/simulation_v2.dir/clean:
 test/CMakeFiles/v3_simulation.dir/all: lib/CMakeFiles/lib.dir/all
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/depend
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/v3_simulation.dir/build.make test/CMakeFiles/v3_simulation.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=12,13 "Built target v3_simulation"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexie/Documents/slam_demo/build/CMakeFiles --progress-num=14,15 "Built target v3_simulation"
 .PHONY : test/CMakeFiles/v3_simulation.dir/all
 
 # Build rule for subdir invocation for target.

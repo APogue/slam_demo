@@ -3,6 +3,9 @@
 /home/alexie/Documents/slam_demo/build/lib/CMakeFiles/rebuild_cache.dir
 /home/alexie/Documents/slam_demo/build/lib/CMakeFiles/lib.dir
 /home/alexie/Documents/slam_demo/build/lib/CMakeFiles/edit_cache.dir
+/home/alexie/Documents/slam_demo/build/sim/CMakeFiles/rebuild_cache.dir
+/home/alexie/Documents/slam_demo/build/sim/CMakeFiles/sim_opt_app.dir
+/home/alexie/Documents/slam_demo/build/sim/CMakeFiles/edit_cache.dir
 /home/alexie/Documents/slam_demo/build/test/CMakeFiles/rebuild_cache.dir
 /home/alexie/Documents/slam_demo/build/test/CMakeFiles/reprojection_error_test.dir
 /home/alexie/Documents/slam_demo/build/test/CMakeFiles/pre_int_imu_error_test.dir

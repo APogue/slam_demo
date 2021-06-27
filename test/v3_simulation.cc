@@ -86,13 +86,12 @@ struct ObservationData {
       timestamp_ = timestamp;
     }
     Eigen::Matrix2d cov() {
-      double sigma_2 = size_ * size_ / 64.0;
+      double sigma_2 = 1e-7;
       return sigma_2 * Eigen::Matrix2d::Identity();
     }
     double timestamp_;
     size_t landmark_id_;
     Eigen::Vector2d feature_pos_;
-    double size_;
 };
 
 Eigen::Quaterniond quat_pos(Eigen::Quaterniond q){
@@ -142,12 +141,12 @@ class SimSLAM {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   // parameters
-  int state_length =100;
-  int landmark_length = 4*50;
-  double sigma_g_c = 6.0e-4;
-  double sigma_a_c = 2.0e-3;
-  double del_t = 0.01;
-  double T = 0.0; // time
+  int state_length =500;
+  int landmark_length = 4*125;
+  double sigma_g_c = 8.0e-4;
+  double sigma_a_c = 6.0e-3;
+  double del_t = 0.02;
+  double init_t = 0.0; // time
   double r = 5.0; // circle radius x-y plane
   double w = .76; // angular velocity
   double r_z = (1.0/20)*r;
@@ -178,6 +177,7 @@ class SimSLAM {
   ceres::Solver::Summary optimization_summary_;
 public:
   bool SetGroundTruth() {
+    double T = init_t;
     for (unsigned i = 0; i < state_length; i++) {
         Eigen::Matrix<double, 3, 3> Tr;
         Eigen::Vector3d pos;
@@ -213,7 +213,7 @@ public:
 
   bool GetIMUData() {
   // IMU -> est. trajectory
-    T = 0.0;
+    double T = init_t;
     for (unsigned i=0; i<state_length-1; i++) {
         IMU* new_imu_ptr = new IMU;
         Eigen::Vector3d a_N;
@@ -242,7 +242,7 @@ public:
   }
   void set_init_traj(const Eigen::Vector3d& p0,
                      const Eigen::Vector3d& v0, const Eigen::Quaterniond& q0){
-    T = 0;
+    double T = init_t;
     dr_vec_.push_back(new State(T)); //how can this be pushed back inside the function?
     dr_vec_.at(0)->GetPositionBlock()->setEstimate(p0);
     dr_vec_.at(0)->GetVelocityBlock()->setEstimate(v0);
@@ -250,13 +250,14 @@ public:
   }
   void add_noise_traj() {
     for (unsigned i = 1; i < state_length; i++) {
-      Eigen::Vector3d p_noise_ = dr_vec_.at(i)->GetPositionBlock()->estimate() + .5*Eigen::Vector3d::Random();
-      Eigen::Vector3d v_noise_ = dr_vec_.at(i)->GetVelocityBlock()->estimate() + .5*Eigen::Vector3d::Random();
+      Eigen::Vector3d p_noise_ = dr_vec_.at(i)->GetPositionBlock()->estimate() + .15*Eigen::Vector3d::Random();
+      Eigen::Vector3d v_noise_ = dr_vec_.at(i)->GetVelocityBlock()->estimate() + .15*Eigen::Vector3d::Random();
       dr_vec_.at(i)->GetPositionBlock()->setEstimate(p_noise_);
       dr_vec_.at(i)->GetVelocityBlock()->setEstimate(v_noise_);
     }
   }
   bool SetDeadReckoning(){
+    double T = init_t;
     // Dead reckoning -> est. trajectory
     Eigen::Vector3d p_dr = gt_vec_.at(0)->GetPositionBlock()->estimate();
     Eigen::Vector3d v_dr = gt_vec_.at(0)->GetVelocityBlock()->estimate();
@@ -292,8 +293,8 @@ public:
       gt_landmark_vec_.push_back(new Landmarks);
       lmk_pos(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
       lmk_pos(1) = (r+box_xy);
-      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos + .5*Eigen::Vector3d::Random()); //triangularization noise
+      lmk_pos(2) = (box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos + .05*Eigen::Vector3d::Random()); //triangularization noise
       gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
 //      std::cout<<"landmark"<<" "<< 2*gt_landmark_vec_.at(i)->landmark_ptr_->estimate()<<std::endl;
     }
@@ -302,8 +303,8 @@ public:
       gt_landmark_vec_.push_back(new Landmarks);
       lmk_pos(0) = (r+box_xy)*Eigen::Vector3d::Random()(0);
       lmk_pos(1) = -(r+box_xy);
-      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      lmk_pos(2) = (box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.05*Eigen::Vector3d::Random());
       gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
     for (unsigned i=landmark_length/2; i< 3*landmark_length/4; i++) { //x walls first
@@ -311,8 +312,8 @@ public:
       gt_landmark_vec_.push_back(new Landmarks);
       lmk_pos(0) = (r+box_xy);
       lmk_pos(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      lmk_pos(2) = (box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.05*Eigen::Vector3d::Random());
       gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
     for (unsigned i=3*landmark_length/4; i< landmark_length; i++) { //x walls first
@@ -320,8 +321,8 @@ public:
       gt_landmark_vec_.push_back(new Landmarks);
       lmk_pos(0) = -(r+box_xy);
       lmk_pos(1) = (r+box_xy)*Eigen::Vector3d::Random()(1);
-      lmk_pos(2) = (z_h + box_z)*Eigen::Vector3d::Random()(2) + z_h;
-      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.5*Eigen::Vector3d::Random());
+      lmk_pos(2) = (box_z)*Eigen::Vector3d::Random()(2) + z_h;
+      landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos+.05*Eigen::Vector3d::Random());
       gt_landmark_vec_.at(i) ->landmark_ptr_->setEstimate(lmk_pos);
     }
   }
@@ -356,16 +357,16 @@ public:
         Eigen::Vector4d homogenous_lmk_vec = Eigen::Vector4d(0, 0, 0, 1);
         homogenous_lmk_vec.head(3) = gt_landmark_vec_.at(k)->landmark_ptr_->estimate();
         Eigen::Vector4d landmark_c = T_cb * T_bn * homogenous_lmk_vec;
-        Eigen::Vector2d feature_pt;
         if (landmark_c(2) > 0) {
+          Eigen::Vector2d feature_pt;
           feature_pt(0) = fu * landmark_c(0) / landmark_c(2) + cu;
           feature_pt(1) = fv * landmark_c(1) / landmark_c(2) + cv;
           // check whether this point is in the frame
           if (abs(feature_pt(0)) <= du/2 && abs(feature_pt(1)) <= dv/2) {
-            T = gt_vec_.at(i)->GetTimestamp();
+            double T = gt_vec_.at(i)->GetTimestamp();
             ObservationData* feature_obs_ptr = new ObservationData(T);
             feature_obs_ptr->landmark_id_ = k;
-            feature_obs_ptr->feature_pos_ = feature_pt;
+            feature_obs_ptr->feature_pos_ = feature_pt+1e-7*Eigen::Vector2d::Random();
             observation_vec_.at(i).push_back(feature_obs_ptr);
 //            prot_landmark_vec_.push_back(gt_landmark_vec_.at(k));
 //            std::cout<<"landmarks"<<" "<< gt_landmark_vec_.at(k)->landmark_ptr_->estimate().size()<<std::endl;
@@ -455,7 +456,6 @@ public:
       optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetRotationBlock()->parameters());
       optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetVelocityBlock()->parameters());
       optimization_problem_.SetParameterBlockConstant(dr_vec_.at(0)->GetPositionBlock()->parameters());
-
       return true;
       }
 
@@ -466,15 +466,16 @@ public:
     optimization_options_.linear_solver_type = ceres::SPARSE_SCHUR;
     optimization_options_.minimizer_progress_to_stdout = true;
     optimization_options_.num_threads = 6;
-    optimization_options_.function_tolerance = 1e-10;
-    optimization_options_.parameter_tolerance = 1e-15;
-    optimization_options_.max_num_iterations = 50;
+    optimization_options_.function_tolerance = 1e-20;
+    optimization_options_.parameter_tolerance = 1e-25;
+    optimization_options_.max_num_iterations = 100;
 
 
     ceres::Solve(optimization_options_, &optimization_problem_, &optimization_summary_);
     std::cout << optimization_summary_.FullReport() << "\n";
 
     return true;
+
   }
 
   bool OutputOptResult(){

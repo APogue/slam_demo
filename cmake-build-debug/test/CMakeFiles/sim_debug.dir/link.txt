@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/sim_debug.dir/sim_debug.cc.o  -o sim_debug  ../lib/liblib.a /usr/local/lib/libceres.a -lpthread /usr/lib/x86_64-linux-gnu/libglog.so 

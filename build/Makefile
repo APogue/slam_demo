@@ -143,6 +143,19 @@ lib/fast:
 .PHONY : lib/fast
 
 #=============================================================================
+# Target rules for targets named sim_opt_app
+
+# Build rule for target.
+sim_opt_app: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sim_opt_app
+.PHONY : sim_opt_app
+
+# fast build rule for target.
+sim_opt_app/fast:
+	$(MAKE) $(MAKESILENT) -f sim/CMakeFiles/sim_opt_app.dir/build.make sim/CMakeFiles/sim_opt_app.dir/build
+.PHONY : sim_opt_app/fast
+
+#=============================================================================
 # Target rules for targets named reprojection_error_test
 
 # Build rule for target.
@@ -232,6 +245,7 @@ help:
 	@echo "... lib"
 	@echo "... pre_int_imu_error_test"
 	@echo "... reprojection_error_test"
+	@echo "... sim_opt_app"
 	@echo "... simulation"
 	@echo "... simulation_v2"
 	@echo "... v3_simulation"

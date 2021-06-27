@@ -45,6 +45,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/alexie/Documents/slam_demo/build/lib/cmake_install.cmake")
+  include("/home/alexie/Documents/slam_demo/build/sim/cmake_install.cmake")
   include("/home/alexie/Documents/slam_demo/build/test/cmake_install.cmake")
 
 endif()

@@ -8,8 +8,8 @@ option(BUILD_TEST "build test programs" ON)
 
 
 
-#find_package(OpenCV REQUIRED)
-#message("-- OpenCV version: ${OpenCV_VERSION}")
+find_package(OpenCV REQUIRED)
+message("-- OpenCV version: ${OpenCV_VERSION}")
 
 find_package(Eigen3 REQUIRED)
 
@@ -19,6 +19,7 @@ find_package(Ceres REQUIRED)
 
 #add_subdirectory(apps)
 add_subdirectory(lib)
+add_subdirectory(sim)
 
 if(BUILD_TEST)
   add_subdirectory(test)

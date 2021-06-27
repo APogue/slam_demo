@@ -3,6 +3,9 @@
 /home/alexie/Documents/slam_demo/cmake-build-debug/lib/CMakeFiles/edit_cache.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/lib/CMakeFiles/rebuild_cache.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/lib/CMakeFiles/lib.dir
+/home/alexie/Documents/slam_demo/cmake-build-debug/sim/CMakeFiles/rebuild_cache.dir
+/home/alexie/Documents/slam_demo/cmake-build-debug/sim/CMakeFiles/edit_cache.dir
+/home/alexie/Documents/slam_demo/cmake-build-debug/sim/CMakeFiles/sim_opt_app.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/rebuild_cache.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/simulation_v2.dir
 /home/alexie/Documents/slam_demo/cmake-build-debug/test/CMakeFiles/edit_cache.dir
